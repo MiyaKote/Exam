@@ -2,6 +2,7 @@ package scoremanager.main;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,58 +24,68 @@ public class TestRegistExecuteAction extends Action {
 		// ローカル変数の宣言 1
 		HttpSession session = req.getSession();
 		Teacher teacher = (Teacher) session.getAttribute("user");
-		String no = ""; // 学生番号
-		String subject = ""; // 科目名
-		String testDate = ""; // 実施日
-		String scoreStr = ""; // 得点（文字列）
-		int score = 0; // 得点
+		String studentNo = ""; // 学生番号
+		String subjectCd = ""; // 科目CD
+		String schoolCd = ""; // 学校CD
+		String classNum = ""; // クラス番号
+		String pointStr = ""; // 得点（文字列）
+		int point = 0; // 得点
 		Student student = null; // 学生
 		StudentDao studentDao = new StudentDao(); // 学生DAO
 		Map<String, String> errors = new HashMap<>(); // エラーメッセージ
 
 		// リクエストパラメータの取得 2
-		no = req.getParameter("no");
-		subject = req.getParameter("subject");
-		testDate = req.getParameter("test_date");
-		scoreStr = req.getParameter("score");
+		studentNo = req.getParameter("student_no");
+		subjectCd = req.getParameter("subject_cd");
+		schoolCd  = req.getParameter("school_cd");
+		classNum  = req.getParameter("class_num");
+		pointStr  = req.getParameter("point");
 
 		// DBからデータ取得 3
-		student = studentDao.get(no);
+		student = studentDao.get(studentNo);
 
 		// ビジネスロジック 4
 		// 入力値バリデーション
-		if (subject == null || subject.isEmpty()) {
-			errors.put("subject", "科目名を入力してください");
+		if (subjectCd == null || subjectCd.isEmpty()) {
+			errors.put("subject_cd", "科目CDを入力してください");
 		}
-		if (testDate == null || testDate.isEmpty()) {
-			errors.put("test_date", "実施日を入力してください");
-		}
-		if (scoreStr == null || scoreStr.isEmpty()) {
-			errors.put("score", "得点を入力してください");
+		if (pointStr == null || pointStr.isEmpty()) {
+			errors.put("point", "得点を入力してください");
 		} else {
-			score = Integer.parseInt(scoreStr);
-			if (score < 0 || score > 100) {
-				errors.put("score", "得点は0〜100の範囲で入力してください");
+			point = Integer.parseInt(pointStr);
+			if (point < 0 || point > 100) {
+				errors.put("point", "得点は0〜100の範囲で入力してください");
 			}
 		}
 
 		// DBへデータ保存 5
 		if (errors.isEmpty()) {
-			// エラーなしの場合、testテーブルへINSERT
 			Dao dao = new Dao();
 			Connection connection = dao.getConnection();
 			PreparedStatement statement = null;
+
 			try {
+				// NOカラム（連番）をMAX+1で採番
+				int no = 1;
+				statement = connection.prepareStatement("select max(no) from test");
+				ResultSet rs = statement.executeQuery();
+				if (rs.next() && rs.getObject(1) != null) {
+					no = rs.getInt(1) + 1;
+				}
+				statement.close();
+
+				// testテーブルへINSERT
 				statement = connection.prepareStatement(
-					"insert into test(no, school_cd, class_num, subject, test_date, score) values(?, ?, ?, ?, ?, ?)"
+					"insert into test(student_no, subject_cd, school_cd, no, point, class_num) values(?, ?, ?, ?, ?, ?)"
 				);
-				statement.setString(1, no);
-				statement.setString(2, student.getSchool().getCd());
-				statement.setString(3, student.getClassNum());
-				statement.setString(4, subject);
-				statement.setString(5, testDate);
-				statement.setInt(6, score);
+				statement.setString(1, studentNo);
+				statement.setString(2, subjectCd);
+				statement.setString(3, schoolCd);
+				statement.setInt(4, no);
+				statement.setInt(5, point);
+				statement.setString(6, classNum);
 				statement.executeUpdate();
+
 			} catch (Exception e) {
 				throw e;
 			} finally {
@@ -96,19 +107,16 @@ public class TestRegistExecuteAction extends Action {
 		}
 
 		// レスポンス値をセット 6
-		req.setAttribute("no", no);
+		req.setAttribute("no", studentNo);
 		req.setAttribute("student", student);
-		req.setAttribute("subject", subject);
-		req.setAttribute("test_date", testDate);
-		req.setAttribute("score", scoreStr);
+		req.setAttribute("subject_cd", subjectCd);
+		req.setAttribute("point", pointStr);
 		req.setAttribute("errors", errors);
 
 		// JSPへフォワード 7
 		if (errors.isEmpty()) {
-			// 登録成功 → 完了ページへ
 			req.getRequestDispatcher("/scoremanager/main/test_regist_done.jsp").forward(req, res);
 		} else {
-			// バリデーションエラー → 登録フォームへ戻る
 			req.getRequestDispatcher("/scoremanager/main/test_regist.jsp").forward(req, res);
 		}
 	}
