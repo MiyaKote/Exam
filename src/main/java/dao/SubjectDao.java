@@ -80,4 +80,39 @@ public class SubjectDao extends Dao {
 		}
 		return list;
 	}
+	
+	// SubjectDao.java の中に追加する
+	public boolean save(Subject subject) throws Exception {
+	    Connection connection = getConnection();
+	    PreparedStatement statement = null;
+	    int count = 0;
+
+	    try {
+	        // SQL文：科目を新しく登録する命令
+	        statement = connection.prepareStatement(
+	            "insert into subject (cd, name, school_cd) values (?, ?, ?)"
+	        );
+	        statement.setString(1, subject.getCd());
+	        statement.setString(2, subject.getName());
+	        statement.setString(3, subject.getSchool().getCd());
+
+	        // 実行！
+	        count = statement.executeUpdate();
+	    } catch (Exception e) {
+	        throw e;
+	    } finally {
+	        if (statement != null) {
+	            statement.close();
+	        }
+	        if (connection != null) {
+	            connection.close();
+	        }
+	    }
+
+	    if (count > 0) {
+	        return true; // 1件以上登録できたら成功
+	    } else {
+	        return false; // 登録できなかったら失敗
+	    }
+	}
 }
