@@ -67,31 +67,26 @@
 					<div class="border rounded mx-3 mb-3 p-3">
 						<h3 class="h6 mb-3 text-secondary">STEP 3｜得点を入力</h3>
 						<form action="TestRegistExecute.action" method="post">
-							<%-- 学生番号を隠しフィールドで引き継ぐ --%>
-							<input type="hidden" name="no" value="${student.no}" />
+							<%-- 学生番号・学校CD・クラスを隠しフィールドで引き継ぐ --%>
+							<input type="hidden" name="student_no" value="${student.no}" />
+							<input type="hidden" name="school_cd" value="${student.school.cd}" />
+							<input type="hidden" name="class_num" value="${student.classNum}" />
 
 							<div class="mb-3">
-								<label for="subject" class="form-label">科目名</label>
-								<input class="form-control" type="text" id="subject" name="subject"
-									value="${subject}" maxlength="50" placeholder="例：数学、英語" required />
-								<div class="text-warning mt-1">${errors.get("subject")}</div>
+								<label for="subject_cd" class="form-label">科目CD</label>
+								<input class="form-control" type="text" id="subject_cd" name="subject_cd"
+									value="${subject_cd}" maxlength="3" placeholder="例：001" required />
+								<div class="text-warning mt-1">${errors.get("subject_cd")}</div>
 							</div>
 
 							<div class="mb-3">
-								<label for="test_date" class="form-label">実施日</label>
-								<input class="form-control" type="date" id="test_date" name="test_date"
-									value="${test_date}" required />
-								<div class="text-warning mt-1">${errors.get("test_date")}</div>
-							</div>
-
-							<div class="mb-3">
-								<label for="score" class="form-label">得点</label>
+								<label for="point" class="form-label">得点</label>
 								<div class="input-group" style="max-width: 200px;">
-									<input class="form-control" type="number" id="score" name="score"
-										value="${score}" min="0" max="100" placeholder="0〜100" required />
+									<input class="form-control" type="number" id="point" name="point"
+										value="${point}" min="0" max="100" placeholder="0〜100" required />
 									<span class="input-group-text">点</span>
 								</div>
-								<div class="text-warning mt-1">${errors.get("score")}</div>
+								<div class="text-warning mt-1">${errors.get("point")}</div>
 							</div>
 
 							<div class="mt-3">
@@ -101,7 +96,6 @@
 					</div>
 				</c:when>
 				<c:when test="${not empty no and empty student}">
-					<%-- 学生番号を入力したが見つからなかった場合 --%>
 					<div class="mx-3 text-warning">
 						学生番号「${no}」に該当する学生が見つかりませんでした。
 					</div>
