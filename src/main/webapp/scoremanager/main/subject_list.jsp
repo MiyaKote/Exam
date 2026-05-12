@@ -25,7 +25,6 @@
 					</tr>
 				</thead>
 				<tbody>
-					<%-- ここでDaoのfilterメソッドから届いた「お盆（list）」を1つずつ取り出す --%>
 					<c:forEach var="subject" items="${subjects}">
 						<tr>
 							<td>${subject.cd}</td>
@@ -33,7 +32,7 @@
 							<td class="text-end">
 								<%-- どの科目を変更・削除するか、コードを付けて飛ばす --%>
 								<a href="SubjectUpdate.action?cd=${subject.cd}" class="btn btn-primary btn-sm">変更</a>
-								<a href="SubjectDelete.action?cd=${subject.cd}" class="btn btn-danger btn-sm">削除</a>
+								<a href="SubjectDeleteExecute.action?cd=${subject.cd}" class="btn btn-danger btn-sm">削除</a>
 							</td>
 						</tr>
 					</c:forEach>
